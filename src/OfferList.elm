@@ -10,11 +10,15 @@ type alias Model =
 
 
 type alias CashOfferCardDetails =
-    { offerType : OfferType, offer : Float }
+    { offer : Float }
 
 
 type alias FinanceOfferCardDetails =
-    { offerType : OfferType, financeType : FinanceType, financeView : FinanceView, financeOffer : Float }
+    { financeType : FinanceType, financeView : FinanceView, financeOffer : Float }
+
+
+type alias GenericOfferCardDetails =
+    { offerType : OfferType }
 
 
 type FinanceType
@@ -33,13 +37,13 @@ type OfferType
 
 
 type OfferCard
-    = Cash CashOfferCardDetails
-    | Finance FinanceOfferCardDetails
+    = Cash GenericOfferCardDetails CashOfferCardDetails
+    | Finance GenericOfferCardDetails FinanceOfferCardDetails
 
 
 initialOfferCards : List OfferCard
 initialOfferCards =
-    [ Cash { offerType = HotDeal, offer = 100.0 }, Finance { offerType = NonHotDeal, financeType = PcpFinance, financeView = Monthly, financeOffer = 10000 }, Finance { offerType = NonHotDeal, financeType = PcpFinance, financeView = Lump, financeOffer = 10000 } ]
+    [ Cash { offerType = HotDeal } { offer = 100.0 }, Finance { offerType = HotDeal } { financeType = PcpFinance, financeView = Monthly, financeOffer = 10000 }, Finance { offerType = NonHotDeal } { financeType = PcpFinance, financeView = Lump, financeOffer = 10000 } ]
 
 
 type alias Flags =
@@ -67,16 +71,16 @@ view model =
 offerCardView : OfferCard -> Html Msg
 offerCardView offerCard =
     case offerCard of
-        Cash offerDetails ->
+        Cash genericOfferDetails offerDetails ->
             cashOfferCardView offerDetails
 
-        Finance offerDetails ->
+        Finance genericOfferDetails offerDetails ->
             financeOfferCardView offerDetails
 
 
 cashOfferCardView : CashOfferCardDetails -> Html Msg
 cashOfferCardView offerDetails =
-    div [] [ text <| String.fromFloat offerDetails.offer ]
+    div [] [ div [] [ text <| String.fromFloat offerDetails.offer ] ]
 
 
 financeOfferCardView : FinanceOfferCardDetails -> Html Msg
