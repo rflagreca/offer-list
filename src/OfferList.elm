@@ -1,11 +1,15 @@
 module OfferList exposing (main)
 
 import Browser
-import Html exposing (Html, div, text)
+import Html exposing (Html, button, div, text)
+import Html.Events exposing (onClick)
 
 
 type alias Model =
     { offers : List OfferCard
+    , make : String
+    , model : String
+    , state : OfferListState
     }
 
 
@@ -19,6 +23,12 @@ type alias FinanceOfferCardDetails =
 
 type alias GenericOfferCardDetails =
     { offerType : OfferType }
+
+
+type OfferListState
+    = WaitingForOffers
+    | OffersReceived
+    | OffersExpired
 
 
 type FinanceType
@@ -52,20 +62,38 @@ type alias Flags =
 
 type Msg
     = NoOp
+    | ToggleState
 
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
         model =
-            { offers = initialOfferCards }
+            { offers = initialOfferCards, state = OffersReceived, make = "Audi", model = "A4" }
     in
     ( model, Cmd.none )
 
 
 view : Model -> Html Msg
 view model =
-    div [] <| List.map offerCardView model.offers
+    let
+        offersView =
+            case model.state of
+                WaitingForOffers ->
+                    div [] [ text "Waiting for your offers" ]
+
+                OffersReceived ->
+                    div [] <| List.map offerCardView model.offers
+
+                OffersExpired ->
+                    div [] [ text "Your offers have expired" ]
+    in
+    div [] [ offersView, stateToggleBtn ]
+
+
+stateToggleBtn : Html Msg
+stateToggleBtn =
+    div [] [ button [ onClick ToggleState ] [ text "Toggle State" ] ]
 
 
 offerCardView : OfferCard -> Html Msg
@@ -112,6 +140,17 @@ update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+
+        ToggleState ->
+            case model.state of
+                WaitingForOffers ->
+                    ( { model | state = OffersReceived }, Cmd.none )
+
+                OffersReceived ->
+                    ( { model | state = OffersExpired }, Cmd.none )
+
+                OffersExpired ->
+                    ( { model | state = WaitingForOffers }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
