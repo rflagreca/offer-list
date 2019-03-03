@@ -1,7 +1,7 @@
 module OfferList exposing (main)
 
 import Browser
-import Html exposing (Html, div)
+import Html exposing (Html, div, text)
 
 
 type alias Model =
@@ -14,7 +14,7 @@ type alias CashOfferCardDetails =
 
 
 type alias FinanceOfferCardDetails =
-    { offerType : OfferType, financeType : FinanceType, financeView : FinanceView }
+    { offerType : OfferType, financeType : FinanceType, financeView : FinanceView, financeOffer : Float }
 
 
 type FinanceType
@@ -37,9 +37,9 @@ type OfferCard
     | Finance FinanceOfferCardDetails
 
 
-initialOfferCard : List OfferCard
-initialOfferCard =
-    [ Cash { offerType = HotDeal, offer = 100.0 } ]
+initialOfferCards : List OfferCard
+initialOfferCards =
+    [ Cash { offerType = HotDeal, offer = 100.0 }, Finance { offerType = NonHotDeal, financeType = PcpFinance, financeView = Monthly, financeOffer = 10000 }, Finance { offerType = NonHotDeal, financeType = PcpFinance, financeView = Lump, financeOffer = 10000 } ]
 
 
 type alias Flags =
@@ -54,7 +54,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     let
         model =
-            { offers = initialOfferCard }
+            { offers = initialOfferCards }
     in
     ( model, Cmd.none )
 
@@ -68,10 +68,25 @@ offerCardView : OfferCard -> Html Msg
 offerCardView offerCard =
     case offerCard of
         Cash offerDetails ->
-            div [] []
+            cashOfferCardView offerDetails
 
         Finance offerDetails ->
-            div [] []
+            financeOfferCardView offerDetails
+
+
+cashOfferCardView : CashOfferCardDetails -> Html Msg
+cashOfferCardView offerDetails =
+    div [] [ text <| String.fromFloat offerDetails.offer ]
+
+
+financeOfferCardView : FinanceOfferCardDetails -> Html Msg
+financeOfferCardView offerDetails =
+    case offerDetails.financeView of
+        Monthly ->
+            div [] [ text <| String.fromFloat <| offerDetails.financeOffer / 12 ]
+
+        Lump ->
+            div [] [ text <| String.fromFloat <| offerDetails.financeOffer ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
