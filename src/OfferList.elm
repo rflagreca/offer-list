@@ -70,12 +70,26 @@ view model =
 
 offerCardView : OfferCard -> Html Msg
 offerCardView offerCard =
-    case offerCard of
-        Cash genericOfferDetails offerDetails ->
-            cashOfferCardView offerDetails
+    let
+        concreteOfferCard =
+            case offerCard of
+                Cash genericOfferDetails offerDetails ->
+                    ( genericOfferCardView genericOfferDetails, cashOfferCardView offerDetails )
 
-        Finance genericOfferDetails offerDetails ->
-            financeOfferCardView offerDetails
+                Finance genericOfferDetails offerDetails ->
+                    ( genericOfferCardView genericOfferDetails, financeOfferCardView offerDetails )
+    in
+    div [] [ Tuple.first concreteOfferCard, Tuple.second concreteOfferCard ]
+
+
+genericOfferCardView : GenericOfferCardDetails -> Html Msg
+genericOfferCardView genericDetails =
+    case genericDetails.offerType of
+        HotDeal ->
+            text "It's a Hot Deal"
+
+        NonHotDeal ->
+            text "It's Not a Hot Deal"
 
 
 cashOfferCardView : CashOfferCardDetails -> Html Msg
